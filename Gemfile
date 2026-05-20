@@ -48,7 +48,7 @@ gem "groupdate", "~> 6.5"
 # Online payments
 gem "stripe", "~> 13.0"
 # Multi-currency support
-gem "money-rails", "~> 1.15"
+gem "money-rails", "~> 3.0"
 # Pagination
 gem "pagy", "~> 9.3"
 # Recurring invoice scheduling
