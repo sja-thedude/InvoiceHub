@@ -1,0 +1,12 @@
+<% content_for :title, "Payment received" %>
+
+<div class="min-h-screen bg-slate-100 flex items-center justify-center px-4">
+  <div class="max-w-md w-full rounded-2xl bg-white shadow-sm border border-slate-200 p-10 text-center">
+    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+      <%= icon_svg(:check, classes: "w-8 h-8").html_safe %>
+    </div>
+    <h1 class="mt-5 text-2xl font-bold text-slate-900">Thank you!</h1>
+    <p class="mt-2 text-slate-500">Your payment for invoice <strong><%= @invoice.invoice_number %></strong> is being processed. A receipt will follow shortly.</p>
+    <%= link_to "View invoice", public_invoice_path(@invoice.public_token), class: "mt-6 inline-block rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500" %>
+  </div>
+</div>

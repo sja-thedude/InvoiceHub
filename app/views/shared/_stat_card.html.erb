@@ -1,0 +1,17 @@
+<%# locals: title, value, sub:, icon:, accent: %>
+<% accent ||= "indigo" %>
+<div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+  <div class="flex items-start justify-between">
+    <div class="min-w-0">
+      <p class="text-sm font-medium text-slate-500"><%= title %></p>
+      <p class="mt-2 text-2xl font-bold text-slate-900 truncate"><%= value %></p>
+      <% if local_assigns[:sub].present? %>
+        <p class="mt-1 text-xs text-slate-400"><%= sub %></p>
+      <% end %>
+    </div>
+    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-<%= accent %>-50 text-<%= accent %>-600">
+      <%= icon_svg(icon || :invoice).html_safe %>
+    </div>
+  </div>
+  <div class="absolute -right-6 -bottom-6 h-20 w-20 rounded-full bg-<%= accent %>-50/60"></div>
+</div>

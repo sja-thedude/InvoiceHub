@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+/*
+  Force-generate the colour utilities that are composed dynamically in helpers
+  and partials (e.g. bg-#{accent}-50). Tailwind's scanner can't see runtime
+  strings, so we safelist the palette + shades we use.
+*/
+@source inline("{bg,text,border,ring,from,to}-{indigo,emerald,red,blue,amber,purple,slate}-{50,100,500,600,700}");
+@source inline("bg-{emerald,red,blue,amber,purple,slate,indigo}-50/60");
+
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Chartkick tooltips look better with a small radius */
+.chartkick-tooltip {
+  border-radius: 8px !important;
+}

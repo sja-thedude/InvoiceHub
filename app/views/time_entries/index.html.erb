@@ -1,0 +1,62 @@
+<% content_for :page_title, "Time Tracking" %>
+
+<div class="space-y-5">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-900">Time tracking</h2>
+      <p class="text-sm text-slate-500">Log billable hours and turn them into invoice line items.</p>
+    </div>
+    <%= link_to new_time_entry_path, class: "inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" do %>
+      <span class="w-4 h-4"><%= icon_svg(:plus, classes: "w-4 h-4").html_safe %></span> Log time
+    <% end %>
+  </div>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+    <%= render "shared/stat_card", title: "Total hours", value: "#{@total_hours.to_f}h", icon: :clock, accent: "indigo" %>
+    <%= render "shared/stat_card", title: "Billable hours", value: "#{@billable_hours.to_f}h", icon: :cash, accent: "emerald" %>
+    <%= render "shared/stat_card", title: "Entries", value: @pagy.count, icon: :receipt, accent: "blue" %>
+  </div>
+
+  <% if @time_entries.any? %>
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-100 text-sm">
+          <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+            <tr>
+              <th class="px-5 py-3 text-left">Date</th>
+              <th class="px-5 py-3 text-left">Description</th>
+              <th class="px-5 py-3 text-left">Project</th>
+              <th class="px-5 py-3 text-right">Hours</th>
+              <th class="px-5 py-3 text-right">Amount</th>
+              <th class="px-5 py-3 text-center">Status</th>
+              <th class="px-5 py-3"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <% @time_entries.each do |entry| %>
+              <tr class="hover:bg-slate-50">
+                <td class="px-5 py-3 text-slate-500 whitespace-nowrap"><%= entry.date.strftime("%b %-d, %Y") %></td>
+                <td class="px-5 py-3 text-slate-800"><%= entry.description %></td>
+                <td class="px-5 py-3 text-slate-500"><%= entry.project.name %></td>
+                <td class="px-5 py-3 text-right font-medium text-slate-900"><%= entry.hours.to_f %></td>
+                <td class="px-5 py-3 text-right text-slate-600"><%= money entry.amount, entry.project.currency %></td>
+                <td class="px-5 py-3 text-center">
+                  <% if !entry.billable %><%= status_pill "non-billable", "bg-slate-100 text-slate-500" %>
+                  <% elsif entry.invoiced %><%= status_pill "invoiced", "bg-emerald-100 text-emerald-700" %>
+                  <% else %><%= status_pill "billable", "bg-amber-100 text-amber-700" %><% end %>
+                </td>
+                <td class="px-5 py-3 text-right whitespace-nowrap">
+                  <%= link_to "Edit", edit_time_entry_path(entry), class: "text-xs font-medium text-indigo-600 hover:text-indigo-500" %>
+                  <%= button_to "Delete", entry, method: :delete, form: { class: "inline", data: { turbo_confirm: "Delete entry?" } }, class: "text-xs font-medium text-red-500 hover:text-red-600 ml-2" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="pt-2"><%== pagy_nav(@pagy) if @pagy.pages > 1 %></div>
+  <% else %>
+    <%= render "shared/empty_state", title: "No time logged yet", body: "Track hours against a project to bill them later.", icon: :clock, action_label: "Log time", action_path: new_time_entry_path %>
+  <% end %>
+</div>

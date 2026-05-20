@@ -1,0 +1,97 @@
+<% content_for :page_title, @client.name %>
+
+<div class="space-y-6">
+  <%= link_to clients_path, class: "text-sm text-slate-500 hover:text-slate-700" do %>← Back to clients<% end %>
+
+  <%# Header card %>
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+      <%= avatar_initials @client.name, classes: "w-16 h-16 text-xl" %>
+      <div class="flex-1 min-w-0">
+        <h2 class="text-2xl font-bold text-slate-900"><%= @client.name %></h2>
+        <p class="text-slate-500"><%= @client.company %></p>
+        <div class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-500">
+          <% if @client.email.present? %><span><%= icon_svg(:mail, classes: "w-4 h-4 inline").html_safe %> <%= @client.email %></span><% end %>
+          <% if @client.phone.present? %><span>📞 <%= @client.phone %></span><% end %>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <%= link_to "New invoice", new_invoice_path(client_id: @client.id), class: "rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500" %>
+        <%= link_to "Edit", edit_client_path(@client), class: "rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" %>
+      </div>
+    </div>
+
+    <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs text-slate-400">Total billed</p><p class="text-lg font-bold text-slate-900"><%= money_short @client.total_billed %></p></div>
+      <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs text-slate-400">Paid</p><p class="text-lg font-bold text-emerald-600"><%= money_short @client.total_paid %></p></div>
+      <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs text-slate-400">Outstanding</p><p class="text-lg font-bold text-amber-600"><%= money_short @client.outstanding %></p></div>
+      <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs text-slate-400">Projects</p><p class="text-lg font-bold text-slate-900"><%= @projects.size %></p></div>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-6">
+    <%# Projects %>
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <h3 class="font-semibold text-slate-900">Projects</h3>
+        <%= link_to "Add", new_project_path(client_id: @client.id), class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+      </div>
+      <% if @projects.any? %>
+        <ul class="divide-y divide-slate-100">
+          <% @projects.each do |project| %>
+            <li>
+              <%= link_to project, class: "flex items-center justify-between px-5 py-3 hover:bg-slate-50" do %>
+                <div>
+                  <p class="text-sm font-medium text-slate-900"><%= project.name %></p>
+                  <p class="text-xs text-slate-400"><%= money project.hourly_rate, project.currency %>/hr</p>
+                </div>
+                <%= status_pill project.status, project.status_color %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="px-5 py-8 text-center text-sm text-slate-400">No projects yet.</p>
+      <% end %>
+    </div>
+
+    <%# Recent invoices %>
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <h3 class="font-semibold text-slate-900">Invoices</h3>
+        <%= link_to "Full history", history_client_path(@client), class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+      </div>
+      <% if @invoices.any? %>
+        <ul class="divide-y divide-slate-100">
+          <% @invoices.each do |invoice| %>
+            <li>
+              <%= link_to invoice, class: "flex items-center justify-between px-5 py-3 hover:bg-slate-50" do %>
+                <div>
+                  <p class="text-sm font-medium text-slate-900"><%= invoice.invoice_number %></p>
+                  <p class="text-xs text-slate-400"><%= invoice.issue_date&.strftime("%b %-d, %Y") %></p>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm font-semibold text-slate-900"><%= money invoice.total, invoice.currency %></p>
+                  <%= status_pill invoice.status, invoice.status_color %>
+                </div>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="px-5 py-8 text-center text-sm text-slate-400">No invoices yet.</p>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @client.notes.present? %>
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h3 class="font-semibold text-slate-900 mb-2">Notes</h3>
+      <p class="text-sm text-slate-600 whitespace-pre-line"><%= @client.notes %></p>
+    </div>
+  <% end %>
+
+  <div>
+    <%= button_to "Delete client", @client, method: :delete, form: { data: { turbo_confirm: "Delete #{@client.name} and all related data?" } }, class: "text-sm font-medium text-red-600 hover:text-red-700" %>
+  </div>
+</div>

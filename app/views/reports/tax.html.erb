@@ -1,0 +1,58 @@
+<% content_for :page_title, "Tax Summary" %>
+
+<div class="space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <%= link_to reports_path, class: "text-sm text-slate-500 hover:text-slate-700" do %>← All reports<% end %>
+      <h2 class="text-2xl font-bold text-slate-900">Tax summary — <%= @year %></h2>
+    </div>
+    <%= form_with url: reports_tax_path, method: :get do %>
+      <%= select_tag :year, options_for_select(@years, @year), onchange: "this.form.requestSubmit()", class: "rounded-xl border-slate-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" %>
+    <% end %>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <%= render "shared/stat_card", title: "Net revenue", value: money(@net_revenue), sub: "Subtotals (pre-tax)", icon: :cash, accent: "indigo" %>
+    <%= render "shared/stat_card", title: "Tax collected", value: money(@tax_collected), sub: "Output tax", icon: :receipt, accent: "amber" %>
+    <%= render "shared/stat_card", title: "Gross revenue", value: money(@gross_revenue), sub: "Incl. tax", icon: :invoice, accent: "emerald" %>
+    <%= render "shared/stat_card", title: "Deductible expenses", value: money(@expenses_total), sub: "Recorded in #{@year}", icon: :folder, accent: "red" %>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h3 class="font-semibold text-slate-900 mb-4">Tax by quarter</h3>
+      <% %w[Q1 Q2 Q3 Q4].each do |q| %>
+        <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+          <span class="text-sm text-slate-500"><%= q %></span>
+          <span class="text-sm font-semibold text-slate-900"><%= money(@quarters[q] || 0) %></span>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100"><h3 class="font-semibold text-slate-900">Invoices issued in <%= @year %></h3></div>
+      <% if @invoices.any? %>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-100 text-sm">
+            <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+              <tr><th class="px-5 py-3 text-left">Invoice</th><th class="px-5 py-3 text-left">Date</th><th class="px-5 py-3 text-right">Net</th><th class="px-5 py-3 text-right">Tax</th><th class="px-5 py-3 text-right">Gross</th></tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <% @invoices.each do |invoice| %>
+                <tr class="hover:bg-slate-50">
+                  <td class="px-5 py-3 font-medium text-indigo-600"><%= link_to invoice.invoice_number, invoice %></td>
+                  <td class="px-5 py-3 text-slate-500"><%= invoice.issue_date.strftime("%b %-d") %></td>
+                  <td class="px-5 py-3 text-right text-slate-600"><%= money invoice.subtotal, invoice.currency %></td>
+                  <td class="px-5 py-3 text-right text-slate-600"><%= money invoice.tax_amount, invoice.currency %></td>
+                  <td class="px-5 py-3 text-right font-medium text-slate-900"><%= money invoice.total, invoice.currency %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <p class="px-5 py-10 text-center text-sm text-slate-400">No invoices issued in <%= @year %>.</p>
+      <% end %>
+    </div>
+  </div>
+</div>

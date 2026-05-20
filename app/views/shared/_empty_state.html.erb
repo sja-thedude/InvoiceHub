@@ -1,0 +1,13 @@
+<%# locals: title, body:, icon:, action_label:, action_path: %>
+<div class="rounded-2xl border-2 border-dashed border-slate-200 bg-white px-6 py-16 text-center">
+  <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+    <%= icon_svg(local_assigns.fetch(:icon, :invoice)).html_safe %>
+  </div>
+  <h3 class="mt-4 text-base font-semibold text-slate-900"><%= title %></h3>
+  <% if local_assigns[:body].present? %>
+    <p class="mt-1 text-sm text-slate-500 max-w-sm mx-auto"><%= body %></p>
+  <% end %>
+  <% if local_assigns[:action_label].present? %>
+    <%= link_to action_label, action_path, class: "mt-5 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" %>
+  <% end %>
+</div>

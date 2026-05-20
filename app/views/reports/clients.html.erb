@@ -1,0 +1,40 @@
+<% content_for :page_title, "Revenue by Client" %>
+
+<div class="space-y-6">
+  <div>
+    <%= link_to reports_path, class: "text-sm text-slate-500 hover:text-slate-700" do %>← All reports<% end %>
+    <h2 class="text-2xl font-bold text-slate-900">Revenue by client</h2>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-6">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h3 class="font-semibold text-slate-900 mb-4">Top clients (paid)</h3>
+      <% if @chart.values.sum.to_d.positive? %>
+        <%= bar_chart @chart, colors: ["#10B981"], height: "340px", prefix: Money::Currency.new(current_user.default_currency).symbol, thousands: "," %>
+      <% else %>
+        <%= render "shared/empty_chart" %>
+      <% end %>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100 flex justify-between"><h3 class="font-semibold text-slate-900">Breakdown</h3><span class="text-sm text-slate-400">Total paid: <%= money @total_paid %></span></div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-100 text-sm">
+          <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+            <tr><th class="px-5 py-3 text-left">Client</th><th class="px-5 py-3 text-right">Billed</th><th class="px-5 py-3 text-right">Paid</th><th class="px-5 py-3 text-right">Outstanding</th></tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <% @rows.each do |row| %>
+              <tr class="hover:bg-slate-50">
+                <td class="px-5 py-3 font-medium text-slate-900"><%= link_to row[:client].name, row[:client], class: "hover:text-indigo-600" %></td>
+                <td class="px-5 py-3 text-right text-slate-600"><%= money row[:billed] %></td>
+                <td class="px-5 py-3 text-right font-medium text-emerald-600"><%= money row[:paid] %></td>
+                <td class="px-5 py-3 text-right text-amber-600"><%= money row[:outstanding] %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

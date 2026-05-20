@@ -1,0 +1,47 @@
+<% content_for :page_title, "Clients" %>
+
+<div class="space-y-5">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-900">Clients</h2>
+      <p class="text-sm text-slate-500">Manage the people and companies you bill.</p>
+    </div>
+    <%= link_to new_client_path, class: "inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" do %>
+      <span class="w-4 h-4"><%= icon_svg(:plus, classes: "w-4 h-4").html_safe %></span> New Client
+    <% end %>
+  </div>
+
+  <%= form_with url: clients_path, method: :get, class: "relative max-w-md" do %>
+    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><%= icon_svg(:search, classes: "w-4 h-4").html_safe %></span>
+    <%= search_field_tag :q, params[:q], placeholder: "Search clients…", class: "w-full rounded-xl border-slate-300 pl-10 text-sm focus:border-indigo-500 focus:ring-indigo-500" %>
+  <% end %>
+
+  <% if @clients.any? %>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <% @clients.each do |client| %>
+        <%= link_to client, class: "group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-indigo-200 transition" do %>
+          <div class="flex items-center gap-3">
+            <%= avatar_initials client.name, classes: "w-11 h-11 text-sm" %>
+            <div class="min-w-0">
+              <p class="font-semibold text-slate-900 truncate group-hover:text-indigo-600"><%= client.name %></p>
+              <p class="text-xs text-slate-400 truncate"><%= client.company.presence || client.email.presence || "—" %></p>
+            </div>
+          </div>
+          <div class="mt-4 grid grid-cols-2 gap-3 text-center">
+            <div class="rounded-xl bg-slate-50 py-2">
+              <p class="text-xs text-slate-400">Billed</p>
+              <p class="text-sm font-semibold text-slate-900"><%= money_short client.total_billed %></p>
+            </div>
+            <div class="rounded-xl bg-slate-50 py-2">
+              <p class="text-xs text-slate-400">Outstanding</p>
+              <p class="text-sm font-semibold text-amber-600"><%= money_short client.outstanding %></p>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+    <div class="pt-2"><%== pagy_nav(@pagy) if @pagy.pages > 1 %></div>
+  <% else %>
+    <%= render "shared/empty_state", title: "No clients yet", body: "Add your first client to start sending invoices.", icon: :users, action_label: "Add client", action_path: new_client_path %>
+  <% end %>
+</div>

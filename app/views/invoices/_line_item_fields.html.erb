@@ -1,0 +1,24 @@
+<div class="grid grid-cols-12 gap-2 items-center px-2 py-2 border-b border-slate-100" data-line-item>
+  <div class="col-span-12 sm:col-span-6">
+    <%= item.text_field :description, placeholder: "Description of work…",
+          class: "w-full rounded-lg border-slate-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" %>
+  </div>
+  <div class="col-span-3 sm:col-span-2">
+    <%= item.number_field :quantity, step: "0.01", placeholder: "Qty",
+          data: { field: "quantity", action: "input->line-items#recalculate" },
+          class: "w-full rounded-lg border-slate-300 text-sm text-right focus:border-indigo-500 focus:ring-indigo-500" %>
+  </div>
+  <div class="col-span-4 sm:col-span-2">
+    <%= item.number_field :unit_price, step: "0.01", placeholder: "Price",
+          data: { field: "unit_price", action: "input->line-items#recalculate" },
+          class: "w-full rounded-lg border-slate-300 text-sm text-right focus:border-indigo-500 focus:ring-indigo-500" %>
+  </div>
+  <div class="col-span-4 sm:col-span-1 text-right text-sm font-medium text-slate-700" data-field="line_total">—</div>
+  <div class="col-span-1 text-right">
+    <%= item.hidden_field :position %>
+    <%= item.hidden_field :_destroy, value: false %>
+    <button type="button" data-action="line-items#remove" class="p-1.5 text-slate-300 hover:text-red-500 transition" title="Remove">
+      <%= icon_svg(:trash, classes: "w-4 h-4").html_safe %>
+    </button>
+  </div>
+</div>

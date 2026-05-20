@@ -1,0 +1,153 @@
+<% content_for :page_title, @invoice.invoice_number %>
+
+<div class="space-y-6 max-w-4xl mx-auto">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <%= link_to invoices_path, class: "text-sm text-slate-500 hover:text-slate-700" do %>← Back to invoices<% end %>
+    <div class="flex flex-wrap gap-2">
+      <%= link_to pdf_invoice_path(@invoice), target: "_blank", class: "inline-flex items-center gap-1.5 rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" do %>
+        <span class="w-4 h-4"><%= icon_svg(:download, classes: "w-4 h-4").html_safe %></span> PDF
+      <% end %>
+      <%= button_to send_email_invoice_path(@invoice), class: "inline-flex items-center gap-1.5 rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" do %>
+        <span class="w-4 h-4"><%= icon_svg(:mail, classes: "w-4 h-4").html_safe %></span> Email
+      <% end %>
+      <% unless @invoice.paid? %>
+        <%= link_to new_invoice_payment_path(@invoice), class: "inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-sm font-semibold text-white hover:bg-emerald-500" do %>
+          <span class="w-4 h-4"><%= icon_svg(:cash, classes: "w-4 h-4").html_safe %></span> Record payment
+        <% end %>
+      <% end %>
+      <%= link_to edit_invoice_path(@invoice), class: "inline-flex items-center gap-1.5 rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" do %>
+        <span class="w-4 h-4"><%= icon_svg(:edit, classes: "w-4 h-4").html_safe %></span> Edit
+      <% end %>
+    </div>
+  </div>
+
+  <%# Status banner %>
+  <% if @invoice.overdue? %>
+    <div class="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm font-medium text-red-800">
+      ⚠ This invoice is overdue — it was due on <%= @invoice.due_date.strftime("%B %-d, %Y") %>.
+    </div>
+  <% end %>
+
+  <%# The invoice document %>
+  <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div class="h-2 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+    <div class="p-6 sm:p-10">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
+        <div>
+          <% if current_user.logo.attached? %>
+            <%= image_tag current_user.logo.variant(resize_to_limit: [160, 80]), class: "h-14 w-auto mb-3" %>
+          <% end %>
+          <h1 class="text-xl font-bold text-slate-900"><%= current_user.display_name %></h1>
+          <p class="text-sm text-slate-500 whitespace-pre-line"><%= current_user.business_address %></p>
+          <% if current_user.tax_id.present? %><p class="text-sm text-slate-500">Tax ID: <%= current_user.tax_id %></p><% end %>
+        </div>
+        <div class="text-right">
+          <p class="text-3xl font-bold text-indigo-600 tracking-tight">INVOICE</p>
+          <p class="text-slate-500 mt-1"><%= @invoice.invoice_number %></p>
+          <div class="mt-2"><%= status_pill @invoice.status, @invoice.status_color %></div>
+        </div>
+      </div>
+
+      <div class="mt-8 grid sm:grid-cols-2 gap-6">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Bill to</p>
+          <p class="mt-1 font-semibold text-slate-900"><%= @invoice.client.name %></p>
+          <p class="text-sm text-slate-500"><%= @invoice.client.company %></p>
+          <p class="text-sm text-slate-500 whitespace-pre-line"><%= @invoice.client.address %></p>
+          <p class="text-sm text-slate-500"><%= @invoice.client.email %></p>
+        </div>
+        <div class="sm:text-right space-y-1 text-sm">
+          <div class="flex sm:justify-end gap-3"><span class="text-slate-400 w-24 sm:w-auto">Issue date</span><span class="font-medium text-slate-900"><%= @invoice.issue_date&.strftime("%B %-d, %Y") %></span></div>
+          <div class="flex sm:justify-end gap-3"><span class="text-slate-400 w-24 sm:w-auto">Due date</span><span class="font-medium text-slate-900"><%= @invoice.due_date&.strftime("%B %-d, %Y") %></span></div>
+          <% if @invoice.project %><div class="flex sm:justify-end gap-3"><span class="text-slate-400 w-24 sm:w-auto">Project</span><span class="font-medium text-slate-900"><%= @invoice.project.name %></span></div><% end %>
+        </div>
+      </div>
+
+      <%# Items %>
+      <div class="mt-8 overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead>
+            <tr class="bg-slate-900 text-white text-xs uppercase tracking-wider">
+              <th class="px-4 py-2.5 text-left rounded-l-lg">Description</th>
+              <th class="px-4 py-2.5 text-right">Qty</th>
+              <th class="px-4 py-2.5 text-right">Unit price</th>
+              <th class="px-4 py-2.5 text-right rounded-r-lg">Amount</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <% @invoice.invoice_items.each do |item| %>
+              <tr>
+                <td class="px-4 py-3 text-slate-700"><%= item.description %></td>
+                <td class="px-4 py-3 text-right text-slate-500"><%= item.quantity.to_f %></td>
+                <td class="px-4 py-3 text-right text-slate-500"><%= money item.unit_price, @invoice.currency %></td>
+                <td class="px-4 py-3 text-right font-medium text-slate-900"><%= money item.total, @invoice.currency %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <%# Totals %>
+      <div class="mt-6 flex justify-end">
+        <div class="w-full sm:w-72 space-y-2 text-sm">
+          <div class="flex justify-between"><span class="text-slate-500">Subtotal</span><span class="font-medium text-slate-900"><%= money @invoice.subtotal, @invoice.currency %></span></div>
+          <% if @invoice.discount.to_d.positive? %><div class="flex justify-between"><span class="text-slate-500">Discount</span><span class="font-medium text-slate-900">- <%= money @invoice.discount, @invoice.currency %></span></div><% end %>
+          <% if @invoice.tax_rate.to_d.positive? %><div class="flex justify-between"><span class="text-slate-500">Tax (<%= number_with_precision(@invoice.tax_rate, precision: 2, strip_insignificant_zeros: true) %>%)</span><span class="font-medium text-slate-900"><%= money @invoice.tax_amount, @invoice.currency %></span></div><% end %>
+          <div class="flex justify-between border-t border-slate-200 pt-2 text-base"><span class="font-bold text-slate-900">Total</span><span class="font-bold text-indigo-600"><%= money @invoice.total, @invoice.currency %></span></div>
+          <% if @invoice.amount_paid.to_d.positive? %>
+            <div class="flex justify-between text-emerald-600"><span>Paid</span><span class="font-medium">- <%= money @invoice.amount_paid, @invoice.currency %></span></div>
+            <div class="flex justify-between border-t border-slate-200 pt-2"><span class="font-semibold text-slate-900">Balance due</span><span class="font-bold text-slate-900"><%= money @invoice.balance_due, @invoice.currency %></span></div>
+          <% end %>
+        </div>
+      </div>
+
+      <% if @invoice.notes.present? || current_user.bank_details.present? %>
+        <div class="mt-8 grid sm:grid-cols-2 gap-6 border-t border-slate-100 pt-6 text-sm">
+          <% if current_user.bank_details.present? %>
+            <div><p class="font-semibold text-slate-900 mb-1">Payment details</p><p class="text-slate-500 whitespace-pre-line"><%= current_user.bank_details %></p></div>
+          <% end %>
+          <% if @invoice.notes.present? %>
+            <div><p class="font-semibold text-slate-900 mb-1">Notes</p><p class="text-slate-500 whitespace-pre-line"><%= @invoice.notes %></p></div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Payments + meta %>
+  <div class="grid sm:grid-cols-2 gap-6">
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <h3 class="font-semibold text-slate-900">Payments</h3>
+        <% unless @invoice.paid? %><%= link_to "Record", new_invoice_payment_path(@invoice), class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %><% end %>
+      </div>
+      <% if @invoice.payments.any? %>
+        <ul class="divide-y divide-slate-100">
+          <% @invoice.payments.recent.each do |payment| %>
+            <li class="flex items-center justify-between px-5 py-3 text-sm">
+              <div><p class="font-medium text-slate-900"><%= money payment.amount, @invoice.currency %></p><p class="text-xs text-slate-400"><%= payment.payment_method.titleize %> · <%= payment.payment_date.strftime("%b %-d, %Y") %><%= " · #{payment.reference}" if payment.reference.present? %></p></div>
+              <%= button_to "Remove", payment_path(payment), method: :delete, form: { data: { turbo_confirm: "Remove this payment?" } }, class: "text-xs font-medium text-red-500 hover:text-red-600" %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="px-5 py-8 text-center text-sm text-slate-400">No payments recorded.</p>
+      <% end %>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5 space-y-4">
+      <h3 class="font-semibold text-slate-900">Actions</h3>
+      <% if @invoice.draft? %>
+        <%= button_to "Mark as sent", mark_sent_invoice_path(@invoice), method: :patch, class: "w-full rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-500" %>
+      <% end %>
+      <%= button_to "Duplicate invoice", duplicate_invoice_path(@invoice), method: :patch, class: "w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50" %>
+      <%= link_to "Public payment link", public_invoice_path(@invoice.public_token), target: "_blank", class: "block text-center w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50" %>
+      <% if @invoice.recurring? %>
+        <div class="rounded-xl bg-purple-50 px-4 py-3 text-sm text-purple-800">
+          ↻ Recurring <%= @invoice.recurring_interval %> · next run <%= @invoice.recurring_next_run&.strftime("%b %-d, %Y") || "—" %>
+        </div>
+      <% end %>
+      <%= button_to "Delete invoice", @invoice, method: :delete, form: { data: { turbo_confirm: "Delete #{@invoice.invoice_number}?" } }, class: "w-full text-sm font-medium text-red-600 hover:text-red-700 pt-1" %>
+    </div>
+  </div>
+</div>

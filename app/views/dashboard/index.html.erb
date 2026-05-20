@@ -1,0 +1,121 @@
+<% content_for :page_title, "Dashboard" %>
+
+<div class="space-y-6">
+  <%# Greeting %>
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-900">Welcome back, <%= current_user.name.split.first %> 👋</h2>
+      <p class="text-sm text-slate-500 mt-0.5"><%= Date.current.strftime("%A, %B %-d, %Y") %> · Here's your business at a glance.</p>
+    </div>
+    <%= link_to new_invoice_path, class: "inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" do %>
+      <span class="w-4 h-4"><%= icon_svg(:plus, classes: "w-4 h-4").html_safe %></span> Create Invoice
+    <% end %>
+  </div>
+
+  <%# Stat cards %>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <%= render "shared/stat_card", title: "Total Revenue", value: money_short(@total_revenue), sub: "Collected, all-time", icon: :cash, accent: "emerald" %>
+    <%= render "shared/stat_card", title: "Outstanding", value: money_short(@outstanding_amount), sub: "Awaiting payment", icon: :clock, accent: "amber" %>
+    <%= render "shared/stat_card", title: "Overdue", value: money_short(@overdue_amount), sub: "Past due date", icon: :receipt, accent: "red" %>
+    <%= render "shared/stat_card", title: "Draft Invoices", value: @draft_count, sub: "#{@clients_count} clients · #{@projects_count} active projects", icon: :invoice, accent: "indigo" %>
+  </div>
+
+  <%# Charts %>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-slate-900">Revenue — last 12 months</h3>
+        <span class="text-xs font-medium text-slate-400">Collected payments</span>
+      </div>
+      <% if @monthly_revenue.values.sum.positive? %>
+        <%= column_chart @monthly_revenue, colors: ["#6366F1"], library: { borderRadius: 6 }, height: "280px", prefix: Money::Currency.new(@currency).symbol, thousands: "," %>
+      <% else %>
+        <%= render "shared/empty_chart" %>
+      <% end %>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h3 class="font-semibold text-slate-900 mb-4">Invoice status</h3>
+      <% if @status_breakdown.values.sum.positive? %>
+        <%= pie_chart @status_breakdown, donut: true, height: "280px",
+              colors: ["#94A3B8", "#3B82F6", "#10B981", "#EF4444"], legend: "bottom" %>
+      <% else %>
+        <%= render "shared/empty_chart" %>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Lower panels %>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <%# Recent invoices %>
+    <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <h3 class="font-semibold text-slate-900">Recent invoices</h3>
+        <%= link_to "View all", invoices_path, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+      </div>
+      <% if @recent_invoices.any? %>
+        <ul class="divide-y divide-slate-100">
+          <% @recent_invoices.each do |invoice| %>
+            <li>
+              <%= link_to invoice, class: "flex items-center gap-4 px-5 py-3 hover:bg-slate-50 transition" do %>
+                <%= avatar_initials invoice.client.name, classes: "w-9 h-9 text-xs" %>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-medium text-slate-900 truncate"><%= invoice.client.name %></p>
+                  <p class="text-xs text-slate-400"><%= invoice.invoice_number %> · <%= invoice.issue_date&.strftime("%b %-d") %></p>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm font-semibold text-slate-900"><%= money(invoice.total, invoice.currency) %></p>
+                  <%= status_pill invoice.status, invoice.status_color %>
+                </div>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="px-5 py-10 text-center text-sm text-slate-400">No invoices yet. <%= link_to "Create your first one", new_invoice_path, class: "text-indigo-600 font-medium" %>.</p>
+      <% end %>
+    </div>
+
+    <%# Side column: payments + top clients %>
+    <div class="space-y-4">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="px-5 py-4 border-b border-slate-100"><h3 class="font-semibold text-slate-900">Recent payments</h3></div>
+        <% if @recent_payments.any? %>
+          <ul class="divide-y divide-slate-100">
+            <% @recent_payments.each do |payment| %>
+              <li class="flex items-center gap-3 px-5 py-3">
+                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 text-xs"><%= icon_svg(:check, classes: "w-4 h-4").html_safe %></span>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-medium text-slate-900 truncate"><%= payment.invoice.client.name %></p>
+                  <p class="text-xs text-slate-400"><%= payment.payment_method.titleize %> · <%= payment.payment_date.strftime("%b %-d") %></p>
+                </div>
+                <p class="text-sm font-semibold text-emerald-600">+<%= money(payment.amount, payment.invoice.currency) %></p>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="px-5 py-8 text-center text-sm text-slate-400">No payments recorded yet.</p>
+        <% end %>
+      </div>
+
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="px-5 py-4 border-b border-slate-100"><h3 class="font-semibold text-slate-900">Top clients</h3></div>
+        <% if @top_clients.any? %>
+          <ul class="divide-y divide-slate-100">
+            <% @top_clients.each do |client| %>
+              <li>
+                <%= link_to client, class: "flex items-center gap-3 px-5 py-3 hover:bg-slate-50" do %>
+                  <%= avatar_initials client.name, classes: "w-8 h-8 text-xs" %>
+                  <span class="text-sm font-medium text-slate-700 truncate flex-1"><%= client.name %></span>
+                  <span class="text-sm font-semibold text-slate-900"><%= money_short client.total_billed %></span>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="px-5 py-8 text-center text-sm text-slate-400">No clients yet.</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

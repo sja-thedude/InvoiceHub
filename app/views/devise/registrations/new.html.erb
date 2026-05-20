@@ -1,0 +1,45 @@
+<% content_for :title, "Sign up · InvoiceHub" %>
+
+<h1 class="text-2xl font-bold text-slate-900">Create your account</h1>
+<p class="mt-1 text-sm text-slate-500">Start sending professional invoices in minutes.</p>
+
+<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "mt-8 space-y-4" }) do |f| %>
+  <% if resource.errors.any? %>
+    <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <ul class="list-disc list-inside">
+        <% resource.errors.full_messages.each do |msg| %><li><%= msg %></li><% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :name, "Your name", class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_field :name, autofocus: true, required: true, class: "w-full rounded-xl border-slate-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" %>
+  </div>
+  <div>
+    <%= f.label :business_name, "Business name (optional)", class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.text_field :business_name, class: "w-full rounded-xl border-slate-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" %>
+  </div>
+  <div>
+    <%= f.label :email, class: "block text-sm font-medium text-slate-700 mb-1" %>
+    <%= f.email_field :email, autocomplete: "email", required: true, class: "w-full rounded-xl border-slate-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" %>
+  </div>
+  <div class="grid grid-cols-2 gap-3">
+    <div>
+      <%= f.label :password, class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= f.password_field :password, autocomplete: "new-password", required: true, class: "w-full rounded-xl border-slate-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" %>
+    </div>
+    <div>
+      <%= f.label :password_confirmation, "Confirm", class: "block text-sm font-medium text-slate-700 mb-1" %>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", required: true, class: "w-full rounded-xl border-slate-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" %>
+    </div>
+  </div>
+  <% if @minimum_password_length %>
+    <p class="text-xs text-slate-400"><%= @minimum_password_length %> characters minimum.</p>
+  <% end %>
+  <%= f.submit "Create account", class: "w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 cursor-pointer" %>
+<% end %>
+
+<p class="mt-6 text-center text-sm text-slate-500">
+  Already have an account? <%= link_to "Sign in", new_session_path(resource_name), class: "font-semibold text-indigo-600 hover:text-indigo-500" %>
+</p>

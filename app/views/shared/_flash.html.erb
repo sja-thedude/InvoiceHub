@@ -1,0 +1,11 @@
+<% flash.each do |level, message| %>
+  <% next if message.blank? %>
+  <div data-controller="dismiss" data-action="animationend->dismiss#hidden"
+       class="mb-4 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm font-medium <%= flash_classes(level) %>">
+    <span class="mt-0.5 flex-shrink-0">
+      <%= (level.to_s.in?(%w[alert error]) ? icon_svg(:trash, classes: "w-4 h-4") : icon_svg(:check, classes: "w-4 h-4")).html_safe %>
+    </span>
+    <span class="flex-1"><%= message %></span>
+    <button type="button" data-action="dismiss#close" class="text-current/60 hover:text-current">✕</button>
+  </div>
+<% end %>

@@ -1,0 +1,18 @@
+Hi <%= @client.name %>,
+
+Please find attached invoice <%= @invoice.invoice_number %> for <%= Money.from_amount(@invoice.total, @invoice.currency).format %>, due on <%= @invoice.due_date&.strftime("%B %-d, %Y") %>.
+
+Invoice:    <%= @invoice.invoice_number %>
+Issue date: <%= @invoice.issue_date&.strftime("%b %-d, %Y") %>
+Due date:   <%= @invoice.due_date&.strftime("%b %-d, %Y") %>
+Amount due: <%= Money.from_amount(@invoice.balance_due, @invoice.currency).format %>
+
+View & pay online: <%= @pay_url %>
+
+<% if @user.bank_details.present? -%>
+Payment details:
+<%= @user.bank_details %>
+<% end -%>
+
+Thank you for your business!
+<%= @user.display_name %>

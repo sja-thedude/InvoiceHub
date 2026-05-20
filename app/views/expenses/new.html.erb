@@ -1,0 +1,8 @@
+<% content_for :page_title, "New Expense" %>
+<div class="max-w-lg mx-auto">
+  <%= link_to expenses_path, class: "text-sm text-slate-500 hover:text-slate-700" do %>← Back to expenses<% end %>
+  <h2 class="mt-2 text-2xl font-bold text-slate-900">New expense</h2>
+  <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <%= render "form", expense: @expense %>
+  </div>
+</div>

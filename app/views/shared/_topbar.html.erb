@@ -1,0 +1,18 @@
+<header class="sticky top-0 z-20 h-16 bg-white/80 backdrop-blur border-b border-slate-200 flex items-center gap-4 px-4 sm:px-6 lg:px-8">
+  <button type="button" data-action="sidebar#open"
+          class="lg:hidden p-2 -ml-2 rounded-lg text-slate-600 hover:bg-slate-100">
+    <%= icon_svg(:menu).html_safe %>
+  </button>
+
+  <div class="flex-1 min-w-0">
+    <h1 class="text-lg font-semibold text-slate-900 truncate"><%= content_for?(:page_title) ? yield(:page_title) : "Dashboard" %></h1>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <%= link_to new_invoice_path,
+          class: "inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition" do %>
+      <span class="w-4 h-4"><%= icon_svg(:plus, classes: "w-4 h-4").html_safe %></span>
+      <span class="hidden sm:inline">New Invoice</span>
+    <% end %>
+  </div>
+</header>

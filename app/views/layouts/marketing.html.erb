@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html class="h-full bg-white">
+  <head>
+    <title><%= content_for(:title) || "InvoiceHub — Invoicing for freelancers" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="h-full antialiased text-slate-800">
+    <%= render "shared/flash" %>
+    <%= yield %>
+  </body>
+</html>

@@ -1,0 +1,79 @@
+<% content_for :page_title, "Expenses" %>
+
+<div class="space-y-5">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-900">Expenses</h2>
+      <p class="text-sm text-slate-500">Track spend, attach receipts and link to projects.</p>
+    </div>
+    <%= link_to new_expense_path, class: "inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500" do %>
+      <span class="w-4 h-4"><%= icon_svg(:plus, classes: "w-4 h-4").html_safe %></span> New Expense
+    <% end %>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-4">
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm font-medium text-slate-500">Total this view</p>
+      <p class="mt-2 text-2xl font-bold text-slate-900"><%= money @total %></p>
+    </div>
+    <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p class="text-sm font-medium text-slate-500 mb-3">By category</p>
+      <% if @by_category.values.sum.to_d.positive? %>
+        <%= pie_chart @by_category.transform_keys(&:titleize), height: "180px", legend: "right",
+              colors: ["#6366F1", "#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#3B82F6", "#EF4444", "#14B8A6", "#A855F7", "#64748B"] %>
+      <% else %>
+        <p class="text-sm text-slate-400">No expense data yet.</p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap gap-2">
+    <%= link_to "All", expenses_path, class: "rounded-full px-3 py-1 text-sm font-medium #{params[:category].blank? ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}" %>
+    <% Expense.categories.each_key do |category| %>
+      <%= link_to category.titleize, expenses_path(category: category), class: "rounded-full px-3 py-1 text-sm font-medium #{params[:category] == category ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}" %>
+    <% end %>
+  </div>
+
+  <% if @expenses.any? %>
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-100 text-sm">
+          <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+            <tr>
+              <th class="px-5 py-3 text-left">Date</th>
+              <th class="px-5 py-3 text-left">Description</th>
+              <th class="px-5 py-3 text-left">Category</th>
+              <th class="px-5 py-3 text-left">Project</th>
+              <th class="px-5 py-3 text-center">Receipt</th>
+              <th class="px-5 py-3 text-right">Amount</th>
+              <th class="px-5 py-3"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <% @expenses.each do |expense| %>
+              <tr class="hover:bg-slate-50">
+                <td class="px-5 py-3 text-slate-500 whitespace-nowrap"><%= expense.date.strftime("%b %-d, %Y") %></td>
+                <td class="px-5 py-3 text-slate-800"><%= expense.description %></td>
+                <td class="px-5 py-3"><span class="text-slate-600"><%= expense.icon %> <%= expense.category.titleize %></span></td>
+                <td class="px-5 py-3 text-slate-500"><%= expense.project&.name || "—" %></td>
+                <td class="px-5 py-3 text-center">
+                  <% if expense.receipt.attached? %>
+                    <%= link_to "View", url_for(expense.receipt), target: "_blank", class: "text-xs font-medium text-indigo-600 hover:text-indigo-500" %>
+                  <% else %><span class="text-slate-300">—</span><% end %>
+                </td>
+                <td class="px-5 py-3 text-right font-semibold text-slate-900"><%= money expense.amount, expense.currency %></td>
+                <td class="px-5 py-3 text-right whitespace-nowrap">
+                  <%= link_to "Edit", edit_expense_path(expense), class: "text-xs font-medium text-indigo-600 hover:text-indigo-500" %>
+                  <%= button_to "Delete", expense, method: :delete, form: { class: "inline", data: { turbo_confirm: "Delete expense?" } }, class: "text-xs font-medium text-red-500 hover:text-red-600 ml-2" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="pt-2"><%== pagy_nav(@pagy) if @pagy.pages > 1 %></div>
+  <% else %>
+    <%= render "shared/empty_state", title: "No expenses yet", body: "Log your first expense and keep your books tidy.", icon: :receipt, action_label: "New expense", action_path: new_expense_path %>
+  <% end %>
+</div>

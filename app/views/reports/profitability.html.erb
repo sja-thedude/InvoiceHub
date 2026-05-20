@@ -1,0 +1,40 @@
+<% content_for :page_title, "Project Profitability" %>
+
+<div class="space-y-6">
+  <div>
+    <%= link_to reports_path, class: "text-sm text-slate-500 hover:text-slate-700" do %>← All reports<% end %>
+    <h2 class="text-2xl font-bold text-slate-900">Project profitability</h2>
+  </div>
+
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h3 class="font-semibold text-slate-900 mb-4">Profit by project</h3>
+    <% if @chart.any? && @chart.values.any? { |v| v.to_d != 0 } %>
+      <%= bar_chart @chart, colors: ["#8B5CF6"], height: "320px", prefix: Money::Currency.new(current_user.default_currency).symbol, thousands: "," %>
+    <% else %>
+      <%= render "shared/empty_chart" %>
+    <% end %>
+  </div>
+
+  <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-100 text-sm">
+        <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+          <tr><th class="px-5 py-3 text-left">Project</th><th class="px-5 py-3 text-left">Client</th><th class="px-5 py-3 text-right">Hours</th><th class="px-5 py-3 text-right">Revenue</th><th class="px-5 py-3 text-right">Expenses</th><th class="px-5 py-3 text-right">Profit</th></tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% @rows.each do |row| %>
+            <tr class="hover:bg-slate-50">
+              <td class="px-5 py-3 font-medium text-slate-900"><%= link_to row[:project].name, row[:project], class: "hover:text-indigo-600" %></td>
+              <td class="px-5 py-3 text-slate-500"><%= row[:project].client.name %></td>
+              <td class="px-5 py-3 text-right text-slate-600"><%= row[:hours].to_f %></td>
+              <td class="px-5 py-3 text-right text-emerald-600"><%= money row[:revenue], row[:project].currency %></td>
+              <td class="px-5 py-3 text-right text-red-600"><%= money row[:expenses], row[:project].currency %></td>
+              <td class="px-5 py-3 text-right font-semibold <%= row[:profit].to_d.negative? ? 'text-red-600' : 'text-slate-900' %>"><%= money row[:profit], row[:project].currency %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <% if @rows.empty? %><p class="px-5 py-10 text-center text-sm text-slate-400">No projects to report on yet.</p><% end %>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+<% content_for :page_title, "Reports" %>
+
+<div class="space-y-6">
+  <div>
+    <h2 class="text-2xl font-bold text-slate-900">Reports</h2>
+    <p class="text-sm text-slate-500">Understand your revenue, clients, profitability and taxes.</p>
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <% [
+      [:chart, "Revenue by month", "See how much you collected each month of the year.", reports_revenue_path, "indigo"],
+      [:users, "Revenue by client", "Find your most valuable clients at a glance.", reports_clients_path, "emerald"],
+      [:folder, "Project profitability", "Revenue minus expenses, per project.", reports_profitability_path, "purple"],
+      [:receipt, "Tax summary", "Tax collected and net revenue for your accountant.", reports_tax_path, "amber"]
+    ].each do |icon, title, body, path, accent| %>
+      <%= link_to path, class: "group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-#{accent}-200 transition flex items-start gap-4" do %>
+        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-<%= accent %>-50 text-<%= accent %>-600">
+          <%= icon_svg(icon).html_safe %>
+        </div>
+        <div>
+          <p class="font-semibold text-slate-900 group-hover:text-<%= accent %>-600"><%= title %></p>
+          <p class="mt-1 text-sm text-slate-500"><%= body %></p>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

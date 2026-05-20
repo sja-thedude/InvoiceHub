@@ -1,0 +1,42 @@
+<% content_for :page_title, "Business Profile" %>
+
+<div class="max-w-3xl mx-auto space-y-6">
+  <div class="flex items-center justify-between">
+    <h2 class="text-2xl font-bold text-slate-900">Business profile</h2>
+    <%= link_to "Edit", edit_profile_path, class: "rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500" %>
+  </div>
+
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="flex items-center gap-4">
+      <% if current_user.logo.attached? %>
+        <%= image_tag current_user.logo.variant(resize_to_limit: [96, 96]), class: "h-16 w-16 rounded-xl object-contain border border-slate-200 bg-white p-1" %>
+      <% else %>
+        <%= avatar_initials current_user.display_name, classes: "w-16 h-16 text-xl" %>
+      <% end %>
+      <div>
+        <p class="text-lg font-bold text-slate-900"><%= current_user.display_name %></p>
+        <p class="text-sm text-slate-500"><%= current_user.email %></p>
+      </div>
+    </div>
+
+    <dl class="mt-6 grid sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+      <div><dt class="text-slate-400">Contact name</dt><dd class="font-medium text-slate-800"><%= current_user.name %></dd></div>
+      <div><dt class="text-slate-400">Tax ID</dt><dd class="font-medium text-slate-800"><%= current_user.tax_id.presence || "—" %></dd></div>
+      <div><dt class="text-slate-400">Phone</dt><dd class="font-medium text-slate-800"><%= current_user.phone.presence || "—" %></dd></div>
+      <div><dt class="text-slate-400">Website</dt><dd class="font-medium text-slate-800"><%= current_user.website.presence || "—" %></dd></div>
+      <div><dt class="text-slate-400">Default currency</dt><dd class="font-medium text-slate-800"><%= current_user.default_currency %></dd></div>
+      <div><dt class="text-slate-400">Invoice prefix</dt><dd class="font-medium text-slate-800"><%= current_user.invoice_prefix %></dd></div>
+      <div><dt class="text-slate-400">Payment terms</dt><dd class="font-medium text-slate-800"><%= current_user.payment_terms_days %> days</dd></div>
+      <div class="sm:col-span-2"><dt class="text-slate-400">Business address</dt><dd class="font-medium text-slate-800 whitespace-pre-line"><%= current_user.business_address.presence || "—" %></dd></div>
+      <div class="sm:col-span-2"><dt class="text-slate-400">Bank / payment details</dt><dd class="font-medium text-slate-800 whitespace-pre-line"><%= current_user.bank_details.presence || "—" %></dd></div>
+    </dl>
+  </div>
+
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex items-center justify-between">
+    <div>
+      <p class="font-semibold text-slate-900">Sign-in &amp; security</p>
+      <p class="text-sm text-slate-500">Change your email or password.</p>
+    </div>
+    <%= link_to "Manage", edit_user_registration_path, class: "rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" %>
+  </div>
+</div>

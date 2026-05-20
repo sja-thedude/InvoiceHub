@@ -1,0 +1,63 @@
+# Render.com Blueprint for InvoiceHub.
+# Create a new Blueprint instance from this repo and Render will provision the
+# web service, a PostgreSQL database, and a daily cron job automatically.
+#
+# After the first deploy, set these secret env vars in the dashboard:
+#   RAILS_MASTER_KEY  -> contents of config/master.key
+#   APP_HOST          -> your-app.onrender.com  (for mailer/links)
+# Optional (online payments & email):
+#   STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET
+#   SMTP_ADDRESS, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, MAIL_FROM
+
+databases:
+  - name: invoicehub-db
+    databaseName: invoice_hub_production
+    user: invoice_hub
+    plan: free
+
+services:
+  - type: web
+    name: invoicehub
+    runtime: ruby
+    plan: free
+    region: oregon
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec puma -C config/puma.rb"
+    healthCheckPath: /up
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: invoicehub-db
+          property: connectionString
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: APP_HOST
+        sync: false
+      - key: RAILS_ENV
+        value: production
+      - key: RACK_ENV
+        value: production
+      - key: RAILS_SERVE_STATIC_FILES
+        value: "true"
+      - key: RAILS_LOG_TO_STDOUT
+        value: "true"
+      - key: WEB_CONCURRENCY
+        value: "2"
+
+  # Daily job: generate recurring invoices and flag overdue ones.
+  - type: cron
+    name: invoicehub-daily
+    runtime: ruby
+    plan: free
+    schedule: "0 6 * * *"
+    buildCommand: "bundle install"
+    startCommand: "bundle exec rails invoices:daily"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: invoicehub-db
+          property: connectionString
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: RAILS_ENV
+        value: production
