@@ -190,7 +190,10 @@ GEM
     nokogiri (1.19.3-x86_64-linux-musl)
       racc (~> 1.4)
     orm_adapter (0.5.0)
-    pagy (9.4.0)
+    pagy (43.5.5)
+      json
+      uri
+      yaml
     parallel (2.1.0)
     parser (3.3.11.1)
       ast (~> 2.4.1)
@@ -338,6 +341,7 @@ GEM
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
     unicode-emoji (4.2.0)
+    uri (1.1.1)
     useragent (0.16.11)
     warden (1.2.9)
       rack (>= 2.0.9)
@@ -352,6 +356,7 @@ GEM
     websocket-extensions (0.1.5)
     whenever (1.1.2)
       chronic (>= 0.6.3)
+    yaml (0.4.0)
     zeitwerk (2.8.1)
 
 PLATFORMS
@@ -377,7 +382,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   money-rails (~> 1.15)
-  pagy (~> 9.3)
+  pagy (~> 43.5)
   pg (~> 1.1)
   prawn (~> 2.5)
   prawn-table (~> 0.2.2)
