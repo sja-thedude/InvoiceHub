@@ -50,7 +50,7 @@ gem "stripe", "~> 13.0"
 # Multi-currency support
 gem "money-rails", "~> 1.15"
 # Pagination
-gem "pagy", "~> 9.3"
+gem "pagy", "~> 43.5"
 # Recurring invoice scheduling
 gem "whenever", "~> 1.0", require: false
 
