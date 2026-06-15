@@ -46,7 +46,7 @@ gem "prawn-table", "~> 0.2.2"
 gem "chartkick", "~> 5.1"
 gem "groupdate", "~> 6.5"
 # Online payments
-gem "stripe", "~> 13.0"
+gem "stripe", "~> 19.2"
 # Multi-currency support
 gem "money-rails", "~> 1.15"
 # Pagination
